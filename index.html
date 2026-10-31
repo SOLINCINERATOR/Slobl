@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comcord</title>
+<style>
+:root{--bg:rgba(14,13,20,.72);--bg2:rgba(24,22,34,.82);--line:rgba(255,255,255,.08);--tx:#ecebf5;--mu:#9b98b3;--ac:#8b7bff;--ac2:#6f5df0;--red:#f0566a;--ok:#3ecf8e}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;font:15px/1.4 "Segoe UI",system-ui,sans-serif;color:var(--tx);overflow:hidden}
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;background:#0d0c14}
+body::before{content:"";position:fixed;inset:0;background:rgba(8,7,14,.45);z-index:-1}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.hidden{display:none!important}
+/* Login */
+#auth{height:100%;display:grid;place-items:center;padding:16px}
+.card{width:100%;max-width:400px;background:var(--bg2);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:14px;padding:28px}
+.card h1{font-size:26px;margin-bottom:4px}.card p{color:var(--mu);margin-bottom:18px}
+label{display:block;font-size:13px;color:var(--mu);margin:12px 0 5px}
+input{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.35)}
+.btn{background:var(--ac2);padding:11px 16px;border-radius:8px;font-weight:600;width:100%;margin-top:18px}
+.btn:hover{background:var(--ac)}
+.link{color:var(--ac);margin-top:14px;display:block;text-align:center;width:100%}
+.err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+/* App */
+#app{height:100%;display:grid;grid-template-columns:72px 260px 1fr}
+.rail{background:var(--bg);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;border-right:1px solid var(--line)}
+.rail .ico{width:48px;height:48px;border-radius:50%;background:var(--bg2);display:grid;place-items:center;font-weight:700;color:var(--mu)}
+.rail .ico.home{background:var(--ac2);color:#fff;border-radius:16px;position:relative}
+.badge{position:absolute;right:-4px;bottom:-4px;background:var(--red);color:#fff;font-size:11px;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 4px;border:2px solid #15131f}
+.side{background:var(--bg);backdrop-filter:blur(14px);display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0}
+.side .nav{padding:10px}
+.item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:8px;text-align:left;color:var(--mu)}
+.item:hover,.item.on{background:rgba(255,255,255,.08);color:var(--tx)}
+.item .badge{position:static;margin-left:auto;border:0}
+.sec{font-size:12px;color:var(--mu);padding:14px 18px 6px}
+#dms{overflow:auto;padding:0 10px;flex:1}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--ac2),#2bb8c9);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;color:#fff}
+.me{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,.35);border-top:1px solid var(--line)}
+.me .n{flex:1;min-width:0;line-height:1.2}.me b,.me small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me small{color:var(--mu);font-size:12px}
+.ib{width:32px;height:32px;border-radius:6px;color:var(--mu);display:grid;place-items:center}
+.ib:hover{background:rgba(255,255,255,.1);color:var(--tx)}
+.ib.off{color:var(--red)}
+main{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg2);backdrop-filter:blur(10px)}
+.top{height:50px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--line);flex:none}
+.tab{padding:5px 11px;border-radius:6px;color:var(--mu)}.tab.on,.tab:hover{background:rgba(255,255,255,.08);color:var(--tx)}
+.tab.add{background:var(--ok);color:#06210f;font-weight:600}
+.pane{flex:1;overflow:auto;padding:20px;min-height:0}
+.row{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;border-top:1px solid var(--line)}
+.row:hover{background:rgba(255,255,255,.05)}.row .n{flex:1}.row small{color:var(--mu)}
+.sm{padding:6px 12px;border-radius:6px;background:var(--ac2);font-size:13px}.sm.g{background:rgba(255,255,255,.1)}
+.addbox{display:flex;gap:10px;margin-bottom:18px}.addbox input{flex:1}.addbox .btn{width:auto;margin:0}
+.msg{display:flex;gap:12px;padding:6px 8px;border-radius:8px;position:relative}
+.msg:hover{background:rgba(255,255,255,.04)}
+.msg .b{flex:1;min-width:0;overflow-wrap:anywhere}.msg time{color:var(--mu);font-size:12px;margin-left:8px}
+.msg .del{opacity:0;align-self:center}.msg:hover .del,.msg .del:focus-visible{opacity:1}.msg .del:hover{color:var(--red)}
+#feed{flex:1;overflow:auto;padding:14px 16px;min-height:0}
+.compose{padding:0 16px 18px}.compose input{padding:13px 14px;border-radius:10px}
+.empty{color:var(--mu);text-align:center;margin-top:60px}
+#toast{position:fixed;top:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:9}
+.t{background:var(--ac2);padding:12px 16px;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.4);max-width:300px}
+@media(max-width:760px){#app{grid-template-columns:60px 1fr}.side{display:none}#app.chatopen .side{display:none}.rail{padding:8px 0}}
+@media(prefers-reduced-motion:reduce){#bgv{display:none}}
+</style>
+</head>
+<body>
+<video id="bgv" autoplay muted loop playsinline preload="auto"><source src="background.webm" type="video/webm"><source src="background.mp4" type="video/mp4"></video>
+
+<section id="auth">
+  <div class="card">
+    <h1 id="atitle">Willkommen zurück</h1>
+    <p id="asub">Melde dich bei Comcord an.</p>
+    <div id="dnwrap" class="hidden"><label for="dn">Anzeigename</label><input id="dn" maxlength="32" autocomplete="nickname"></div>
+    <label for="un">Benutzername</label><input id="un" maxlength="20" autocomplete="username" placeholder="nur a–z, 0–9, _ und .">
+    <label for="pw">Passwort</label><input id="pw" type="password" autocomplete="current-password">
+    <button class="btn" id="go">Anmelden</button>
+    <div class="err" id="err"></div>
+    <button class="link" id="sw">Noch kein Account? Registrieren</button>
+  </div>
+</section>
+
+<div id="app" class="hidden">
+  <nav class="rail" aria-label="Server">
+    <div class="ico home" title="Comcord">C<span class="badge hidden" id="b1"></span></div>
+  </nav>
+  <aside class="side">
+    <div class="nav">
+      <button class="item on" id="nFriends"><span>👥</span> Freunde <span class="badge hidden" id="b2"></span></button>
+    </div>
+    <div class="sec">Direktnachrichten</div>
+    <div id="dms"></div>
+    <div class="me">
+      <div class="av" id="meAv"></div>
+      <div class="n"><b id="meDn"></b><small id="meUn"></small></div>
+      <button class="ib" id="mic" title="Mikrofon" aria-label="Mikrofon stumm">🎤</button>
+      <button class="ib" id="hp" title="Kopfhörer" aria-label="Ton aus">🎧</button>
+      <button class="ib" id="out" title="Abmelden" aria-label="Abmelden">⎋</button>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="toast" aria-live="polite"></div>
+
+<script>
+// Deine Supabase-Daten (Project Settings -> API)
+const SUPABASE_URL = "https://fpckrdssmyvjpqvlwnco.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwY2tyZHNzbXl2anBxdmx3bmNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0NjMxNDksImV4cCI6MjEwOTAzOTE0OX0.qGzLuZYOCKfwdI3aFXKMeEifwjsxpYHTcDKkZDFeyOI";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ERR = { bad_username:'Benutzername: 3–20 Zeichen, nur a–z, 0–9, _ und .', short_password:'Das Passwort braucht mindestens 6 Zeichen.',
+  username_taken:'Dieser Benutzername ist schon vergeben.', wrong_login:'Benutzername oder Passwort stimmt nicht.',
+  no_such_user:'Diesen Benutzernamen gibt es nicht.', self:'Das bist du selbst.', already:'Es gibt schon eine Anfrage oder Freundschaft.',
+  not_friends:'Ihr seid noch nicht befreundet.', not_logged_in:'Bitte melde dich neu an.' };
+async function api(fn, args) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, { method: 'POST',
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args || {}) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) { const m = (j && j.message) || 'Fehler ' + r.status; const e = new Error(ERR[m] || m); e.code = m; throw e; }
+  return j;
+}
+let token = null, profile = null, st = { friends: [], incoming: [], outgoing: [], last_in: null }, chat = null, tab = 'all', reg = false, lastIn = undefined, seenInc = null, shown = '';
+
+// ---------- Video ----------
+const v = $('bgv');
+const tryPlay = () => v.play().catch(() => {});
+v.addEventListener('canplay', tryPlay); tryPlay();
+document.addEventListener('click', tryPlay, { once: true });
+
+// ---------- Login / Registrierung ----------
+$('sw').onclick = () => { reg = !reg;
+  $('dnwrap').classList.toggle('hidden', !reg);
+  $('atitle').textContent = reg ? 'Account erstellen' : 'Willkommen zurück';
+  $('asub').textContent = reg ? 'Wähle deinen Namen für Comcord.' : 'Melde dich bei Comcord an.';
+  $('go').textContent = reg ? 'Account erstellen' : 'Anmelden';
+  $('sw').textContent = reg ? 'Schon einen Account? Anmelden' : 'Noch kein Account? Registrieren';
+  $('err').textContent = ''; };
+$('pw').onkeydown = e => { if (e.key === 'Enter') $('go').click(); };
+$('go').onclick = async () => {
+  const un = $('un').value.trim().toLowerCase(), pw = $('pw').value, dn = $('dn').value.trim() || un;
+  $('err').textContent = ''; $('go').disabled = true;
+  try {
+    const r = reg ? await api('cc_register', { p_username: un, p_display: dn, p_password: pw }) : await api('cc_login', { p_username: un, p_password: pw });
+    token = r.token; localStorage.setItem('cc_token', token); profile = r; enter();
+  } catch (e) { $('err').textContent = e.message; }
+  $('go').disabled = false;
+};
+$('out').onclick = async () => { try { await api('cc_logout', { p_token: token }); } catch (e) {} localStorage.removeItem('cc_token'); location.reload(); };
+$('mic').onclick = e => e.currentTarget.classList.toggle('off');
+$('hp').onclick = e => e.currentTarget.classList.toggle('off');
+$('nFriends').onclick = () => { chat = null; shown = ''; render(); };
+
+async function start() {
+  token = localStorage.getItem('cc_token');
+  if (!token) return;
+  try { profile = await api('cc_me', { p_token: token }); enter(); } catch (e) { localStorage.removeItem('cc_token'); }
+}
+async function enter() {
+  $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+  $('meAv').textContent = profile.display_name[0].toUpperCase();
+  $('meDn').textContent = profile.display_name; $('meUn').textContent = profile.username;
+  await poll(); render();
+  setInterval(poll, 2000);
+}
+
+// ---------- Aktualisieren (alle 2 Sekunden) ----------
+async function poll() {
+  try {
+    const s = await api('cc_state', { p_token: token });
+    const ids = s.incoming.map(p => p.fid);
+    if (seenInc !== null) s.incoming.filter(p => !seenInc.includes(p.fid)).forEach(p => toast(`${p.display_name} (@${p.username}) hat dich hinzugefügt.`));
+    if (seenInc !== null && s.friends.length > st.friends.length && st.outgoing.length > s.outgoing.length) toast('Deine Freundschaftsanfrage wurde angenommen.');
+    seenInc = ids;
+    const li = s.last_in ? s.last_in.id : 0;
+    if (lastIn !== undefined && li > lastIn && !(chat && chat.id === s.last_in.sender)) toast(`Neue Nachricht von ${s.last_in.name}`);
+    lastIn = li;
+    const sig = JSON.stringify([s.friends, s.incoming, s.outgoing]), old = JSON.stringify([st.friends, st.incoming, st.outgoing]);
+    st = s; setBadges();
+    if (sig !== old) render(); else if (chat) await refreshChat();
+  } catch (e) { if (e.code === 'not_logged_in') { localStorage.removeItem('cc_token'); location.reload(); } }
+}
+function setBadges() { const n = st.incoming.length; [$('b1'), $('b2')].forEach(b => { b.textContent = n; b.classList.toggle('hidden', !n); }); }
+
+// ---------- Ansichten ----------
+function render() {
+  if (chat) { const f = st.friends.find(x => x.id === chat.id); if (!f) chat = null; }
+  $('dms').innerHTML = st.friends.map(f => `<button class="item ${chat && chat.id === f.id ? 'on' : ''}" data-f="${f.id}"><span class="av">${esc(f.display_name[0].toUpperCase())}</span>${esc(f.display_name)}</button>`).join('') || '<div class="empty" style="margin-top:10px;font-size:13px">Noch keine Freunde</div>';
+  $('dms').querySelectorAll('[data-f]').forEach(b => b.onclick = () => openChat(st.friends.find(f => f.id === b.dataset.f)));
+  $('nFriends').classList.toggle('on', !chat);
+  setBadges();
+  if (!chat && tab === 'add' && $('fu')) return;
+  chat ? renderChat() : renderFriends();
+}
+function renderFriends() {
+  const list = tab === 'pending' ? [...st.incoming.map(p => ({ ...p, inc: 1 })), ...st.outgoing.map(p => ({ ...p, inc: 0 }))] : st.friends;
+  $('main').innerHTML = `
+    <div class="top"><b>Freunde</b>
+      <button class="tab ${tab === 'all' ? 'on' : ''}" data-t="all">Alle</button>
+      <button class="tab ${tab === 'pending' ? 'on' : ''}" data-t="pending">Ausstehend${st.incoming.length ? ' (' + st.incoming.length + ')' : ''}</button>
+      <button class="tab add ${tab === 'add' ? 'on' : ''}" data-t="add">Freund hinzufügen</button></div>
+    <div class="pane">${tab === 'add' ? `
+      <h3>Freund hinzufügen</h3><p style="color:var(--mu);margin:6px 0 14px">Gib den Comcord-Benutzernamen ein. Die Person bekommt sofort eine Benachrichtigung.</p>
+      <div class="addbox"><input id="fu" placeholder="Benutzername" autocomplete="off"><button class="btn" id="fgo">Anfrage senden</button></div><div class="err" id="ferr"></div>`
+    : list.length ? list.map(p => `<div class="row"><span class="av">${esc(p.display_name[0].toUpperCase())}</span>
+        <div class="n"><b>${esc(p.display_name)}</b><br><small>@${esc(p.username)}${tab === 'pending' ? (p.inc ? ' · möchte dein Freund sein' : ' · Anfrage gesendet') : ''}</small></div>
+        ${tab === 'pending' ? (p.inc ? `<button class="sm" data-a="${p.fid}">Annehmen</button>` : '') + `<button class="sm g" data-d="${p.fid}">${p.inc ? 'Ablehnen' : 'Abbrechen'}</button>`
+        : `<button class="sm" data-m="${p.id}">Nachricht</button><button class="sm g" data-d="${p.fid}">Entfernen</button>`}</div>`).join('')
+    : `<div class="empty">${tab === 'pending' ? 'Keine offenen Anfragen.' : 'Noch keine Freunde. Füge jemanden über „Freund hinzufügen“ hinzu.'}</div>`}</div>`;
+  $('main').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; renderFriends(); });
+  $('main').querySelectorAll('[data-a]').forEach(b => b.onclick = async () => { await api('cc_answer', { p_token: token, p_fid: +b.dataset.a, p_accept: true }); await poll(); render(); });
+  $('main').querySelectorAll('[data-d]').forEach(b => b.onclick = async () => { await api('cc_answer', { p_token: token, p_fid: +b.dataset.d, p_accept: false }); await poll(); render(); });
+  $('main').querySelectorAll('[data-m]').forEach(b => b.onclick = () => openChat(st.friends.find(f => f.id === b.dataset.m)));
+  if (tab === 'add') { $('fgo').onclick = addFriend; $('fu').onkeydown = e => e.key === 'Enter' && addFriend(); $('fu').focus(); }
+}
+async function addFriend() {
+  const un = $('fu').value.trim().toLowerCase().replace(/^@/, ''), er = $('ferr'); er.style.color = ''; er.textContent = '';
+  if (!un) return;
+  try { const r = await api('cc_add_friend', { p_token: token, p_username: un }); er.style.color = 'var(--ok)'; er.textContent = `Anfrage an ${r.display_name} gesendet.`; $('fu').value = ''; poll(); }
+  catch (e) { er.textContent = e.message; }
+}
+function openChat(f) { chat = f; shown = ''; render(); }
+function renderChat() {
+  $('main').innerHTML = `<div class="top"><span class="av">${esc(chat.display_name[0].toUpperCase())}</span><b>${esc(chat.display_name)}</b><small style="color:var(--mu)">@${esc(chat.username)}</small></div>
+    <div id="feed"></div><div class="compose"><input id="mi" maxlength="2000" placeholder="Nachricht an ${esc(chat.display_name)}" autocomplete="off"></div>`;
+  shown = ''; refreshChat(); $('mi').focus();
+  $('mi').onkeydown = async e => {
+    if (e.key !== 'Enter' || !$('mi').value.trim()) return;
+    const t = $('mi').value.trim(); $('mi').value = '';
+    try { await api('cc_send', { p_token: token, p_other: chat.id, p_content: t }); await refreshChat(); }
+    catch (er) { toast('Senden fehlgeschlagen: ' + er.message); $('mi').value = t; }
+  };
+}
+async function refreshChat() {
+  const c = chat; if (!c) return;
+  let msgs; try { msgs = await api('cc_messages', { p_token: token, p_other: c.id }); } catch (e) { return; }
+  if (!chat || chat.id !== c.id) return;
+  const sig = msgs.map(m => m.id).join(','); if (sig === shown) return; shown = sig;
+  const feed = $('feed'); if (!feed) return;
+  const atEnd = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80 || !feed.children.length;
+  feed.innerHTML = msgs.length ? '' : '<div class="empty">Schreib die erste Nachricht.</div>';
+  msgs.forEach(m => {
+    const mine = m.sender === profile.id, who = mine ? profile : c, d = document.createElement('div');
+    d.className = 'msg'; d.dataset.id = m.id;
+    d.innerHTML = `<span class="av">${esc(who.display_name[0].toUpperCase())}</span><div class="b"><b>${esc(who.display_name)}</b><time>${new Date(m.created_at).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}</time><div>${esc(m.content)}</div></div>${mine ? '<button class="ib del" title="Löschen" aria-label="Nachricht löschen">🗑</button>' : ''}`;
+    const del = d.querySelector('.del');
+    if (del) del.onclick = async () => { await api('cc_delete_msg', { p_token: token, p_id: m.id }); d.remove(); shown = ''; refreshChat(); };
+    feed.appendChild(d);
+  });
+  if (atEnd) feed.scrollTop = feed.scrollHeight;
+}
+function toast(t) { const d = document.createElement('div'); d.className = 't'; d.textContent = t; $('toast').appendChild(d); setTimeout(() => d.remove(), 5000); }
+start();
+</script>
+
+</body>
+</html>
